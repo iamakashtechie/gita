@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "Bhagavad Gita",
+    "slug": "bhagavad-gita",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.gita.offline"
+    },
+    "android": {
+      "package": "com.gita.offline",
+      "adaptiveIcon": {
+        "backgroundColor": "#FAF7F2",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "plugins": [
+      "expo-sqlite",
+      "expo-asset",
+      "expo-audio",
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "1d077b62-7532-4053-915b-2331bcb852d6"
+      }
+    }
+  }
+}

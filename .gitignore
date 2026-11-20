@@ -58,6 +58,11 @@ cover/
 # Django stuff:
 *.log
 local_settings.py
+
+# Generated SQLite DB in data (bundled version is in mobile/assets/)
+data/*.db
+data/*.sqlite
+
 db.sqlite3
 db.sqlite3-journal
 
