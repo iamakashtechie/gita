@@ -62,16 +62,13 @@ export const VerseScreen: React.FC<VerseScreenProps> = ({
     async function loadVerseData() {
       try {
         setLoading(true);
-        const [v, ch, transList, commList] = await Promise.all([
+        const [v, ch] = await Promise.all([
           getVerse(chapterNumber, verseNumber),
           getChapter(chapterNumber),
-          getTranslations((chapterNumber - 1) * 100 + verseNumber), // fallback query or load by verse id
-          getCommentaries((chapterNumber - 1) * 100 + verseNumber),
         ]);
 
         if (v) {
           setVerse(v);
-          // Correctly load relations using actual verse id
           const [actualTrans, actualComm, bmStatus, note] = await Promise.all([
             getTranslations(v.id),
             getCommentaries(v.id),
@@ -83,7 +80,6 @@ export const VerseScreen: React.FC<VerseScreenProps> = ({
           setBookmarked(bmStatus);
           setNoteText(note ? note.note_text : '');
 
-          // Set default authors
           const englishTrans = actualTrans.filter((t) => t.lang === 'english');
           const hindiTrans = actualTrans.filter((t) => t.lang === 'hindi');
           if (preferredLang === 'hindi' && hindiTrans.length > 0) {
@@ -136,7 +132,6 @@ export const VerseScreen: React.FC<VerseScreenProps> = ({
     if (verseNumber > 1) {
       onNavigateVerse(chapterNumber, verseNumber - 1);
     } else if (chapterNumber > 1) {
-      // Go to last verse of previous chapter
       onNavigateVerse(chapterNumber - 1, 1);
     }
   };
@@ -145,7 +140,6 @@ export const VerseScreen: React.FC<VerseScreenProps> = ({
     if (verseNumber < totalVersesInChapter) {
       onNavigateVerse(chapterNumber, verseNumber + 1);
     } else if (chapterNumber < 18) {
-      // Go to verse 1 of next chapter
       onNavigateVerse(chapterNumber + 1, 1);
     }
   };
@@ -158,7 +152,6 @@ export const VerseScreen: React.FC<VerseScreenProps> = ({
     );
   }
 
-  // Filter translations for selected language
   const availableTranslations = translations.filter(
     (t) => t.lang.toLowerCase() === selectedLang.toLowerCase()
   );
@@ -167,7 +160,6 @@ export const VerseScreen: React.FC<VerseScreenProps> = ({
     availableTranslations[0] ||
     translations[0];
 
-  // Filter commentaries
   const availableCommentaries = commentaries.filter(
     (c) => c.lang.toLowerCase() === selectedLang.toLowerCase()
   );
@@ -179,31 +171,71 @@ export const VerseScreen: React.FC<VerseScreenProps> = ({
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Top Action Bar */}
-      <View style={[styles.topBar, { backgroundColor: colors.cardBackground, borderBottomColor: colors.border }]}>
+      <View
+        style={[
+          styles.topBar,
+          {
+            backgroundColor: colors.cardBackground,
+            borderBottomColor: colors.borderSubtle,
+          },
+        ]}
+      >
         <View style={styles.topBarLeft}>
-          <Text style={[styles.verseRefText, { color: colors.primary }]}>
-            Chapter {chapterNumber} • Verse {verseNumber}
-          </Text>
+          <View style={[styles.refPill, { backgroundColor: colors.goldLight }]}>
+            <Text style={[styles.verseRefText, { color: colors.primary }]}>
+              Chapter {chapterNumber} • Verse {verseNumber}
+            </Text>
+          </View>
         </View>
 
         <View style={styles.topBarActions}>
-          <TouchableOpacity onPress={cycleFontSize} style={styles.topIconBtn}>
-            <Ionicons name="text" size={18} color={colors.textPrimary} />
+          <TouchableOpacity
+            onPress={cycleFontSize}
+            style={[styles.topIconBtn, { backgroundColor: colors.pillBg }]}
+            activeOpacity={0.7}
+            accessibilityLabel="Adjust Text Size"
+          >
+            <Ionicons name="text" size={17} color={colors.textPrimary} />
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={handleBookmarkToggle} style={styles.topIconBtn}>
+          <TouchableOpacity
+            onPress={handleBookmarkToggle}
+            style={[
+              styles.topIconBtn,
+              { backgroundColor: bookmarked ? colors.goldLight : colors.pillBg },
+            ]}
+            activeOpacity={0.7}
+            accessibilityLabel="Bookmark Shloka"
+          >
             <Ionicons
               name={bookmarked ? 'bookmark' : 'bookmark-outline'}
-              size={22}
-              color={bookmarked ? colors.accent : colors.textPrimary}
+              size={18}
+              color={bookmarked ? colors.gold : colors.textPrimary}
             />
           </TouchableOpacity>
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Sanskrit Shloka Card */}
-        <View style={[styles.shlokaCard, { backgroundColor: colors.cardBackground, borderColor: colors.primaryLight }]}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Sanskrit Shloka Hero Card */}
+        <View
+          style={[
+            styles.shlokaCard,
+            {
+              backgroundColor: colors.cardBackground,
+              borderColor: colors.border,
+              shadowColor: '#000',
+            },
+          ]}
+        >
+          <View style={styles.shlokaEmblemRow}>
+            <View style={[styles.emblemLine, { backgroundColor: colors.border }]} />
+            <Text style={[styles.shlokaEmblemText, { color: colors.sanskritSubtle }]}>
+              ॥ श्लोक {verse.verse_number} ॥
+            </Text>
+            <View style={[styles.emblemLine, { backgroundColor: colors.border }]} />
+          </View>
+
           <Text
             style={[
               styles.sanskritText,
@@ -213,7 +245,7 @@ export const VerseScreen: React.FC<VerseScreenProps> = ({
             {verse.text}
           </Text>
 
-          <View style={[styles.divider, { backgroundColor: colors.border }]} />
+          <View style={[styles.divider, { backgroundColor: colors.borderSubtle }]} />
 
           <Text
             style={[
@@ -224,7 +256,7 @@ export const VerseScreen: React.FC<VerseScreenProps> = ({
             {verse.transliteration}
           </Text>
 
-          {/* Audio Play Button */}
+          {/* Audio Recitation Action */}
           <View style={styles.audioActionRow}>
             <TouchableOpacity
               style={[
@@ -234,16 +266,20 @@ export const VerseScreen: React.FC<VerseScreenProps> = ({
               onPress={() => {
                 if (isCurrentAudio) {
                   pauseAudio();
-                } else if (currentTrack?.chapterNumber === chapterNumber && currentTrack?.verseNumber === verseNumber) {
+                } else if (
+                  currentTrack?.chapterNumber === chapterNumber &&
+                  currentTrack?.verseNumber === verseNumber
+                ) {
                   resumeAudio();
                 } else {
                   playVerse(chapterNumber, verseNumber);
                 }
               }}
+              activeOpacity={0.8}
             >
               <Ionicons
                 name={isCurrentAudio ? 'pause' : 'volume-high'}
-                size={20}
+                size={19}
                 color="#FFFFFF"
               />
               <Text style={styles.audioPlayButtonText}>
@@ -255,13 +291,25 @@ export const VerseScreen: React.FC<VerseScreenProps> = ({
 
         {/* Word-by-Word Meanings Accordion */}
         {verse.word_meanings ? (
-          <View style={[styles.sectionCard, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+          <View
+            style={[
+              styles.sectionCard,
+              {
+                backgroundColor: colors.cardBackground,
+                borderColor: colors.border,
+                shadowColor: '#000',
+              },
+            ]}
+          >
             <TouchableOpacity
               style={styles.sectionHeaderTouchable}
               onPress={() => setShowWordMeanings(!showWordMeanings)}
+              activeOpacity={0.7}
             >
               <View style={styles.sectionTitleRow}>
-                <Ionicons name="book-outline" size={18} color={colors.primary} />
+                <View style={[styles.sectionIconBadge, { backgroundColor: colors.primaryLight }]}>
+                  <Ionicons name="book-outline" size={16} color={colors.primary} />
+                </View>
                 <Text style={[styles.sectionHeading, { color: colors.textPrimary }]}>
                   Word-by-Word Meanings (पदार्थ)
                 </Text>
@@ -274,45 +322,86 @@ export const VerseScreen: React.FC<VerseScreenProps> = ({
             </TouchableOpacity>
 
             {showWordMeanings && (
-              <Text
-                style={[
-                  styles.wordMeaningsText,
-                  { color: colors.textSecondary, fontSize: 13 * fontSizeMultiplier },
-                ]}
-              >
-                {verse.word_meanings}
-              </Text>
+              <View style={[styles.wordMeaningsBox, { backgroundColor: colors.pillBg }]}>
+                <Text
+                  style={[
+                    styles.wordMeaningsText,
+                    { color: colors.textSecondary, fontSize: 13.5 * fontSizeMultiplier },
+                  ]}
+                >
+                  {verse.word_meanings}
+                </Text>
+              </View>
             )}
           </View>
         ) : null}
 
         {/* Translations Section */}
-        <View style={[styles.sectionCard, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+        <View
+          style={[
+            styles.sectionCard,
+            {
+              backgroundColor: colors.cardBackground,
+              borderColor: colors.border,
+              shadowColor: '#000',
+            },
+          ]}
+        >
           <View style={styles.sectionHeaderRow}>
             <View style={styles.sectionTitleRow}>
-              <Ionicons name="language-outline" size={18} color={colors.primary} />
-              <Text style={[styles.sectionHeading, { color: colors.textPrimary }]}>Translations</Text>
+              <View style={[styles.sectionIconBadge, { backgroundColor: colors.goldLight }]}>
+                <Ionicons name="language-outline" size={16} color={colors.gold} />
+              </View>
+              <Text style={[styles.sectionHeading, { color: colors.textPrimary }]}>
+                Translations
+              </Text>
             </View>
 
-            {/* Language Toggle */}
-            <View style={styles.langSelector}>
+            {/* Language Segment */}
+            <View style={[styles.langSegmentBox, { backgroundColor: colors.pillBg }]}>
               <TouchableOpacity
-                style={[styles.langChoice, selectedLang === 'english' && { backgroundColor: colors.primary }]}
+                style={[
+                  styles.langSegmentBtn,
+                  selectedLang === 'english' && { backgroundColor: colors.cardBackground },
+                ]}
                 onPress={() => setSelectedLang('english')}
+                activeOpacity={0.7}
               >
-                <Text style={[styles.langChoiceText, selectedLang === 'english' && { color: '#FFFFFF' }]}>EN</Text>
+                <Text
+                  style={[
+                    styles.langSegmentBtnText,
+                    { color: selectedLang === 'english' ? colors.primary : colors.textMuted },
+                  ]}
+                >
+                  English
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.langChoice, selectedLang === 'hindi' && { backgroundColor: colors.primary }]}
+                style={[
+                  styles.langSegmentBtn,
+                  selectedLang === 'hindi' && { backgroundColor: colors.cardBackground },
+                ]}
                 onPress={() => setSelectedLang('hindi')}
+                activeOpacity={0.7}
               >
-                <Text style={[styles.langChoiceText, selectedLang === 'hindi' && { color: '#FFFFFF' }]}>HI</Text>
+                <Text
+                  style={[
+                    styles.langSegmentBtnText,
+                    { color: selectedLang === 'hindi' ? colors.primary : colors.textMuted },
+                  ]}
+                >
+                  हिन्दी
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
 
           {/* Author Selector Chips */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.authorChipsScroll}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.authorChipsScroll}
+          >
             {availableTranslations.map((t) => (
               <TouchableOpacity
                 key={t.id}
@@ -320,16 +409,17 @@ export const VerseScreen: React.FC<VerseScreenProps> = ({
                   styles.authorChip,
                   {
                     backgroundColor:
-                      activeTranslation?.id === t.id ? colors.primary : colors.primaryLight,
+                      activeTranslation?.id === t.id ? colors.primary : colors.pillBg,
                   },
                 ]}
                 onPress={() => setSelectedTransAuthor(t.author_name)}
+                activeOpacity={0.7}
               >
                 <Text
                   style={[
                     styles.authorChipText,
                     {
-                      color: activeTranslation?.id === t.id ? '#FFFFFF' : colors.primary,
+                      color: activeTranslation?.id === t.id ? '#FFFFFF' : colors.textSecondary,
                     },
                   ]}
                 >
@@ -340,14 +430,14 @@ export const VerseScreen: React.FC<VerseScreenProps> = ({
           </ScrollView>
 
           {activeTranslation ? (
-            <View style={styles.translationContent}>
+            <View style={[styles.translationContentBox, { backgroundColor: colors.pillBg }]}>
               <Text style={[styles.authorNameLabel, { color: colors.primary }]}>
-                {activeTranslation.author_name}
+                TRANSLATION BY {activeTranslation.author_name}
               </Text>
               <Text
                 style={[
                   styles.translationBody,
-                  { color: colors.textPrimary, fontSize: 15 * fontSizeMultiplier },
+                  { color: colors.textPrimary, fontSize: 14.5 * fontSizeMultiplier },
                 ]}
               >
                 {activeTranslation.description}
@@ -362,10 +452,21 @@ export const VerseScreen: React.FC<VerseScreenProps> = ({
 
         {/* Commentaries Section */}
         {commentaries.length > 0 && (
-          <View style={[styles.sectionCard, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+          <View
+            style={[
+              styles.sectionCard,
+              {
+                backgroundColor: colors.cardBackground,
+                borderColor: colors.border,
+                shadowColor: '#000',
+              },
+            ]}
+          >
             <View style={styles.sectionHeaderRow}>
               <View style={styles.sectionTitleRow}>
-                <Ionicons name="reader-outline" size={18} color={colors.primary} />
+                <View style={[styles.sectionIconBadge, { backgroundColor: colors.primaryLight }]}>
+                  <Ionicons name="reader-outline" size={16} color={colors.primary} />
+                </View>
                 <Text style={[styles.sectionHeading, { color: colors.textPrimary }]}>
                   Commentaries (भाष्य)
                 </Text>
@@ -373,7 +474,11 @@ export const VerseScreen: React.FC<VerseScreenProps> = ({
             </View>
 
             {/* Commentators Chips */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.authorChipsScroll}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.authorChipsScroll}
+            >
               {availableCommentaries.map((c) => (
                 <TouchableOpacity
                   key={c.id}
@@ -381,16 +486,17 @@ export const VerseScreen: React.FC<VerseScreenProps> = ({
                     styles.authorChip,
                     {
                       backgroundColor:
-                        activeCommentary?.id === c.id ? colors.primary : colors.primaryLight,
+                        activeCommentary?.id === c.id ? colors.primary : colors.pillBg,
                     },
                   ]}
                   onPress={() => setSelectedCommAuthor(c.author_name)}
+                  activeOpacity={0.7}
                 >
                   <Text
                     style={[
                       styles.authorChipText,
                       {
-                        color: activeCommentary?.id === c.id ? '#FFFFFF' : colors.primary,
+                        color: activeCommentary?.id === c.id ? '#FFFFFF' : colors.textSecondary,
                       },
                     ]}
                   >
@@ -401,9 +507,9 @@ export const VerseScreen: React.FC<VerseScreenProps> = ({
             </ScrollView>
 
             {activeCommentary ? (
-              <View style={styles.commentaryContent}>
+              <View style={[styles.commentaryContentBox, { backgroundColor: colors.pillBg }]}>
                 <Text style={[styles.authorNameLabel, { color: colors.primary }]}>
-                  Commentary by {activeCommentary.author_name}
+                  COMMENTARY BY {activeCommentary.author_name}
                 </Text>
                 <Text
                   style={[
@@ -423,15 +529,26 @@ export const VerseScreen: React.FC<VerseScreenProps> = ({
         )}
 
         {/* Personal Notes Section */}
-        <View style={[styles.sectionCard, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+        <View
+          style={[
+            styles.sectionCard,
+            {
+              backgroundColor: colors.cardBackground,
+              borderColor: colors.border,
+              shadowColor: '#000',
+            },
+          ]}
+        >
           <View style={styles.sectionHeaderRow}>
             <View style={styles.sectionTitleRow}>
-              <Ionicons name="pencil-outline" size={18} color={colors.primary} />
+              <View style={[styles.sectionIconBadge, { backgroundColor: colors.goldLight }]}>
+                <Ionicons name="pencil-outline" size={16} color={colors.gold} />
+              </View>
               <Text style={[styles.sectionHeading, { color: colors.textPrimary }]}>
-                Personal Reflection
+                Personal Reflections
               </Text>
             </View>
-            <TouchableOpacity onPress={() => setIsEditingNote(!isEditingNote)}>
+            <TouchableOpacity onPress={() => setIsEditingNote(!isEditingNote)} activeOpacity={0.7}>
               <Text style={[styles.editActionText, { color: colors.primary }]}>
                 {isEditingNote ? 'Cancel' : noteText ? 'Edit' : '+ Add Note'}
               </Text>
@@ -446,7 +563,7 @@ export const VerseScreen: React.FC<VerseScreenProps> = ({
                   {
                     color: colors.textPrimary,
                     borderColor: colors.border,
-                    backgroundColor: colors.background,
+                    backgroundColor: colors.pillBg,
                   },
                 ]}
                 placeholder="Write your reflections or insights on this shloka..."
@@ -459,35 +576,54 @@ export const VerseScreen: React.FC<VerseScreenProps> = ({
               <TouchableOpacity
                 style={[styles.saveNoteBtn, { backgroundColor: colors.primary }]}
                 onPress={handleSaveNote}
+                activeOpacity={0.8}
               >
                 <Text style={styles.saveNoteBtnText}>Save Reflection</Text>
               </TouchableOpacity>
             </View>
           ) : noteText ? (
-            <Text style={[styles.savedNoteText, { color: colors.textPrimary }]}>{noteText}</Text>
+            <View style={[styles.savedNoteBox, { backgroundColor: colors.pillBg }]}>
+              <Text style={[styles.savedNoteText, { color: colors.textPrimary }]}>{noteText}</Text>
+            </View>
           ) : (
             <Text style={[styles.emptyNote, { color: colors.textMuted }]}>
-              No reflections written yet. Tap "+ Add Note" to record your thoughts.
+              No reflections written yet. Tap "+ Add Note" to record your insights.
             </Text>
           )}
         </View>
 
-        {/* Bottom Navigation: Prev / Next Shloka */}
+        {/* Bottom Shloka Navigation Bar */}
         <View style={styles.bottomNavRow}>
           <TouchableOpacity
-            style={[styles.navVerseBtn, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}
+            style={[
+              styles.navVerseBtn,
+              {
+                backgroundColor: colors.cardBackground,
+                borderColor: colors.border,
+                shadowColor: '#000',
+              },
+            ]}
             onPress={handlePrevVerse}
+            activeOpacity={0.7}
           >
-            <Ionicons name="chevron-back" size={20} color={colors.primary} />
-            <Text style={[styles.navVerseText, { color: colors.textPrimary }]}>Previous</Text>
+            <Ionicons name="chevron-back" size={18} color={colors.primary} />
+            <Text style={[styles.navVerseText, { color: colors.textPrimary }]}>Previous Shloka</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.navVerseBtn, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}
+            style={[
+              styles.navVerseBtn,
+              {
+                backgroundColor: colors.cardBackground,
+                borderColor: colors.border,
+                shadowColor: '#000',
+              },
+            ]}
             onPress={handleNextVerse}
+            activeOpacity={0.7}
           >
             <Text style={[styles.navVerseText, { color: colors.textPrimary }]}>Next Shloka</Text>
-            <Ionicons name="chevron-forward" size={20} color={colors.primary} />
+            <Ionicons name="chevron-forward" size={18} color={colors.primary} />
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -515,40 +651,71 @@ const styles = StyleSheet.create({
   topBarLeft: {
     flex: 1,
   },
+  refPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
+    alignSelf: 'flex-start',
+  },
   verseRefText: {
-    fontSize: 14,
-    fontWeight: '700',
-    letterSpacing: 0.5,
+    fontSize: 12.5,
+    fontWeight: '800',
+    letterSpacing: 0.3,
   },
   topBarActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 8,
   },
   topIconBtn: {
-    padding: 6,
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   scrollContent: {
     padding: 16,
     paddingBottom: 40,
   },
   shlokaCard: {
-    borderRadius: 16,
-    padding: 20,
+    borderRadius: 22,
+    padding: 22,
     borderWidth: 1,
-    marginBottom: 16,
-    elevation: 2,
+    marginBottom: 14,
+    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
     alignItems: 'center',
   },
-  sanskritText: {
+  shlokaEmblemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 14,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  emblemLine: {
+    height: 1,
+    flex: 1,
+    marginHorizontal: 10,
+  },
+  shlokaEmblemText: {
+    fontSize: 12,
     fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  sanskritText: {
+    fontWeight: '800',
     lineHeight: 32,
     textAlign: 'center',
     marginBottom: 12,
+    letterSpacing: 0.3,
   },
   divider: {
     height: 1,
-    width: '60%',
+    width: '50%',
     marginVertical: 12,
   },
   transliterationText: {
@@ -566,19 +733,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    borderRadius: 24,
+    borderRadius: 16,
     gap: 8,
+    elevation: 2,
+    shadowColor: '#C25E00',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
   },
   audioPlayButtonText: {
     color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 13.5,
+    fontWeight: '700',
   },
   sectionCard: {
-    borderRadius: 14,
+    borderRadius: 18,
     padding: 16,
     borderWidth: 1,
-    marginBottom: 14,
+    marginBottom: 12,
+    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
   },
   sectionHeaderTouchable: {
     flexDirection: 'row',
@@ -596,60 +772,75 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
+  sectionIconBadge: {
+    width: 30,
+    height: 30,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   sectionHeading: {
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: 14.5,
+    fontWeight: '800',
   },
-  langSelector: {
+  langSegmentBox: {
     flexDirection: 'row',
-    borderRadius: 6,
-    backgroundColor: 'rgba(0,0,0,0.05)',
+    borderRadius: 8,
     padding: 2,
+    gap: 2,
   },
-  langChoice: {
+  langSegmentBtn: {
     paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
+    paddingVertical: 4,
+    borderRadius: 6,
   },
-  langChoiceText: {
+  langSegmentBtnText: {
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '800',
+  },
+  wordMeaningsBox: {
+    marginTop: 12,
+    padding: 14,
+    borderRadius: 14,
   },
   wordMeaningsText: {
-    marginTop: 10,
-    lineHeight: 20,
+    lineHeight: 22,
   },
   authorChipsScroll: {
     flexDirection: 'row',
-    marginVertical: 8,
+    marginVertical: 10,
   },
   authorChip: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 16,
+    borderRadius: 12,
     marginRight: 8,
   },
   authorChipText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
   },
-  translationContent: {
-    marginTop: 8,
+  translationContentBox: {
+    marginTop: 6,
+    padding: 14,
+    borderRadius: 14,
   },
   authorNameLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    marginBottom: 6,
-    textTransform: 'uppercase',
+    fontSize: 11,
+    fontWeight: '800',
+    marginBottom: 8,
+    letterSpacing: 0.5,
   },
   translationBody: {
     lineHeight: 24,
   },
-  commentaryContent: {
-    marginTop: 8,
+  commentaryContentBox: {
+    marginTop: 6,
+    padding: 14,
+    borderRadius: 14,
   },
   commentaryBody: {
-    lineHeight: 22,
+    lineHeight: 23,
   },
   emptyNote: {
     fontSize: 13,
@@ -658,34 +849,38 @@ const styles = StyleSheet.create({
   },
   editActionText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   noteInputContainer: {
     marginTop: 10,
   },
   noteTextInput: {
     borderWidth: 1,
-    borderRadius: 8,
-    padding: 10,
+    borderRadius: 12,
+    padding: 12,
     textAlignVertical: 'top',
     fontSize: 14,
-    minHeight: 80,
+    minHeight: 85,
     marginBottom: 10,
   },
   saveNoteBtn: {
     alignSelf: 'flex-end',
     paddingVertical: 8,
     paddingHorizontal: 16,
-    borderRadius: 18,
+    borderRadius: 12,
   },
   saveNoteBtnText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
+  },
+  savedNoteBox: {
+    marginTop: 10,
+    padding: 12,
+    borderRadius: 12,
   },
   savedNoteText: {
-    marginTop: 8,
-    fontSize: 14,
+    fontSize: 13.5,
     lineHeight: 20,
     fontStyle: 'italic',
   },
@@ -700,13 +895,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 12,
+    paddingVertical: 13,
+    borderRadius: 16,
     borderWidth: 1,
     gap: 6,
+    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
   },
   navVerseText: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 13.5,
+    fontWeight: '700',
   },
 });

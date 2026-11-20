@@ -47,26 +47,36 @@ export const BookmarksScreen: React.FC<BookmarksScreenProps> = ({ onSelectVerse,
   const renderBookmarkItem = ({ item }: { item: Bookmark }) => {
     return (
       <TouchableOpacity
-        style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}
+        style={[
+          styles.card,
+          {
+            backgroundColor: colors.cardBackground,
+            borderColor: colors.borderSubtle,
+          },
+        ]}
         onPress={() => onSelectVerse(item.chapter_number, item.verse_number)}
-        activeOpacity={0.7}
+        activeOpacity={0.75}
       >
         <View style={styles.cardHeaderRow}>
-          <View style={[styles.badge, { backgroundColor: colors.primary }]}>
-            <Text style={styles.badgeText}>
+          <View style={[styles.badge, { backgroundColor: colors.goldLight }]}>
+            <Text style={[styles.badgeText, { color: colors.gold }]}>
               Chapter {item.chapter_number} • Verse {item.verse_number}
             </Text>
           </View>
 
-          <TouchableOpacity onPress={() => handleRemove(item.verse_id)} style={styles.removeBtn}>
-            <Ionicons name="trash-outline" size={18} color={colors.textMuted} />
+          <TouchableOpacity
+            onPress={() => handleRemove(item.verse_id)}
+            style={[styles.removeBtn, { backgroundColor: colors.pillBg }]}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Ionicons name="trash-outline" size={15} color={colors.textMuted} />
           </TouchableOpacity>
         </View>
 
         <Text
           style={[
             styles.sanskritText,
-            { color: colors.sanskrit, fontSize: 15 * fontSizeMultiplier },
+            { color: colors.sanskrit, fontSize: 16 * fontSizeMultiplier },
           ]}
           numberOfLines={2}
         >
@@ -74,11 +84,21 @@ export const BookmarksScreen: React.FC<BookmarksScreenProps> = ({ onSelectVerse,
         </Text>
 
         <Text
-          style={[styles.transliterationText, { color: colors.textSecondary }]}
+          style={[
+            styles.transliterationText,
+            { color: colors.textSecondary, fontSize: 13 * fontSizeMultiplier },
+          ]}
           numberOfLines={2}
         >
           {item.transliteration}
         </Text>
+
+        <View style={styles.cardFooter}>
+          <Text style={[styles.footerActionText, { color: colors.primary }]}>
+            Read Shloka & Reflections
+          </Text>
+          <Ionicons name="chevron-forward" size={14} color={colors.primary} />
+        </View>
       </TouchableOpacity>
     );
   };
@@ -86,7 +106,10 @@ export const BookmarksScreen: React.FC<BookmarksScreenProps> = ({ onSelectVerse,
   if (loading) {
     return (
       <View style={[styles.centerState, { backgroundColor: colors.background }]}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <ActivityIndicator size="small" color={colors.primary} />
+        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
+          Loading your sacred bookmarks...
+        </Text>
       </View>
     );
   }
@@ -95,11 +118,21 @@ export const BookmarksScreen: React.FC<BookmarksScreenProps> = ({ onSelectVerse,
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       {bookmarks.length === 0 ? (
         <View style={styles.centerState}>
-          <Ionicons name="bookmark-outline" size={54} color={colors.textMuted} />
-          <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>No Saved Verses</Text>
+          <View style={[styles.emptyIconCircle, { backgroundColor: colors.pillBg }]}>
+            <Ionicons name="bookmark-outline" size={38} color={colors.gold} />
+          </View>
+          <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>No Saved Verses Yet</Text>
           <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
-            When reading any verse, tap the bookmark icon to save it to your personal spiritual collection.
+            When reading any verse, tap the bookmark icon to save it here for daily recitation and spiritual contemplation.
           </Text>
+          <TouchableOpacity
+            style={[styles.startExploreBtn, { backgroundColor: colors.primary }]}
+            onPress={() => onSelectVerse(1, 1)}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="book-outline" size={17} color="#FFFFFF" style={{ marginRight: 6 }} />
+            <Text style={styles.startExploreText}>Begin with Chapter 1</Text>
+          </TouchableOpacity>
         </View>
       ) : (
         <FlatList
@@ -108,9 +141,17 @@ export const BookmarksScreen: React.FC<BookmarksScreenProps> = ({ onSelectVerse,
           renderItem={renderBookmarkItem}
           contentContainerStyle={styles.listContent}
           ListHeaderComponent={
-            <Text style={[styles.headerCount, { color: colors.textMuted }]}>
-              {bookmarks.length} {bookmarks.length === 1 ? 'Verse' : 'Verses'} Saved
-            </Text>
+            <View style={styles.headerInfoRow}>
+              <View style={[styles.counterPill, { backgroundColor: colors.pillBg }]}>
+                <Ionicons name="bookmark" size={13} color={colors.gold} style={{ marginRight: 5 }} />
+                <Text style={[styles.headerCount, { color: colors.textSecondary }]}>
+                  {bookmarks.length} {bookmarks.length === 1 ? 'Verse Saved' : 'Verses Saved'}
+                </Text>
+              </View>
+              <Text style={[styles.headerMutedTip, { color: colors.textMuted }]}>
+                Daily Meditation List
+              </Text>
+            </View>
           }
         />
       )}
@@ -128,59 +169,127 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 32,
   },
+  loadingText: {
+    fontSize: 13.5,
+    marginTop: 12,
+  },
+  emptyIconCircle: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   emptyTitle: {
     fontSize: 18,
     fontWeight: '700',
-    marginTop: 14,
+    marginBottom: 8,
   },
   emptySubtitle: {
-    fontSize: 13,
+    fontSize: 13.5,
     textAlign: 'center',
-    marginTop: 8,
-    lineHeight: 20,
+    lineHeight: 21,
+    maxWidth: 290,
+    marginBottom: 24,
+  },
+  startExploreBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderRadius: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  startExploreText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
   },
   listContent: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingTop: 12,
     paddingBottom: 40,
+  },
+  headerInfoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  counterPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
   },
   headerCount: {
     fontSize: 12,
-    fontWeight: '600',
-    marginBottom: 10,
+    fontWeight: '700',
+  },
+  headerMutedTip: {
+    fontSize: 11.5,
+    fontWeight: '500',
   },
   card: {
-    borderRadius: 12,
-    padding: 14,
+    borderRadius: 16,
+    padding: 16,
     borderWidth: 1,
-    marginBottom: 10,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
   },
   cardHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
   },
   badgeText: {
-    color: '#FFFFFF',
-    fontSize: 11,
+    fontSize: 11.5,
     fontWeight: '700',
+    letterSpacing: 0.3,
   },
   removeBtn: {
-    padding: 4,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   sanskritText: {
     fontWeight: '700',
-    lineHeight: 22,
-    marginBottom: 4,
+    lineHeight: 24,
+    marginBottom: 6,
   },
   transliterationText: {
-    fontSize: 13,
     fontStyle: 'italic',
-    lineHeight: 18,
+    lineHeight: 19,
+    marginBottom: 10,
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: 8,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: 'rgba(150, 150, 150, 0.15)',
+  },
+  footerActionText: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginRight: 2,
   },
 });

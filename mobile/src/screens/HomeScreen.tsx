@@ -65,32 +65,45 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     const { verse, translation } = dailyVerse;
 
     return (
-      <View style={[styles.dailyCard, { backgroundColor: colors.cardBackground, borderColor: colors.primaryLight }]}>
+      <View
+        style={[
+          styles.dailyCard,
+          {
+            backgroundColor: colors.cardBackground,
+            borderColor: colors.border,
+            shadowColor: '#000',
+          },
+        ]}
+      >
         <View style={styles.dailyHeaderRow}>
-          <View style={[styles.dailyTag, { backgroundColor: colors.primaryLight }]}>
-            <Ionicons name="sparkles" size={14} color={colors.primary} />
+          <View style={[styles.dailyTagPill, { backgroundColor: colors.goldLight }]}>
+            <Ionicons name="sparkles" size={13} color={colors.primary} />
             <Text style={[styles.dailyTagText, { color: colors.primary }]}>SHLOKA OF THE DAY</Text>
           </View>
-          <Text style={[styles.dailyVerseRef, { color: colors.textSecondary }]}>
-            Ch {verse.chapter_number} : V {verse.verse_number}
-          </Text>
+          <View style={[styles.refPill, { backgroundColor: colors.pillBg }]}>
+            <Text style={[styles.dailyVerseRef, { color: colors.textSecondary }]}>
+              Chapter {verse.chapter_number} • Verse {verse.verse_number}
+            </Text>
+          </View>
         </View>
 
-        <Text
-          style={[
-            styles.dailySanskrit,
-            { color: colors.sanskrit, fontSize: 16 * fontSizeMultiplier },
-          ]}
-          numberOfLines={3}
-        >
-          {verse.text}
-        </Text>
+        {/* Sanskrit Shloka Quote */}
+        <View style={styles.quoteBox}>
+          <Text
+            style={[
+              styles.dailySanskrit,
+              { color: colors.sanskrit, fontSize: 17 * fontSizeMultiplier },
+            ]}
+          >
+            {verse.text}
+          </Text>
+        </View>
 
         {translation && (
           <Text
             style={[
               styles.dailyTranslation,
-              { color: colors.textSecondary, fontSize: 14 * fontSizeMultiplier },
+              { color: colors.textSecondary, fontSize: 13.5 * fontSizeMultiplier },
             ]}
             numberOfLines={3}
           >
@@ -100,19 +113,21 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
         <View style={styles.dailyActionsRow}>
           <TouchableOpacity
-            style={[styles.dailyButton, { backgroundColor: colors.primaryLight }]}
+            style={[styles.dailyListenBtn, { backgroundColor: colors.primaryLight }]}
             onPress={() => playVerse(verse.chapter_number, verse.verse_number)}
+            activeOpacity={0.7}
           >
-            <Ionicons name="volume-medium" size={16} color={colors.primary} />
-            <Text style={[styles.dailyButtonText, { color: colors.primary }]}>Listen</Text>
+            <Ionicons name="volume-high" size={16} color={colors.primary} />
+            <Text style={[styles.dailyListenText, { color: colors.primary }]}>Listen Recitation</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.dailyButtonPrimary, { backgroundColor: colors.primary }]}
+            style={[styles.dailyReadBtn, { backgroundColor: colors.primary }]}
             onPress={() => onSelectVerse(verse.chapter_number, verse.verse_number)}
+            activeOpacity={0.8}
           >
-            <Text style={styles.dailyButtonPrimaryText}>Read & Commentaries</Text>
-            <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
+            <Text style={styles.dailyReadText}>Explore</Text>
+            <Ionicons name="arrow-forward" size={15} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
       </View>
@@ -120,22 +135,33 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   };
 
   const renderChapterItem = ({ item }: { item: Chapter }) => {
+    const formattedNumber = item.chapter_number < 10 ? `0${item.chapter_number}` : `${item.chapter_number}`;
+
     return (
       <TouchableOpacity
-        style={[styles.chapterCard, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}
+        style={[
+          styles.chapterCard,
+          {
+            backgroundColor: colors.cardBackground,
+            borderColor: colors.border,
+            shadowColor: '#000',
+          },
+        ]}
         onPress={() => onSelectChapter(item.chapter_number)}
         activeOpacity={0.7}
       >
-        <View style={[styles.chapterNumberBadge, { backgroundColor: colors.primaryLight }]}>
-          <Text style={[styles.chapterNumberText, { color: colors.primary }]}>{item.chapter_number}</Text>
+        <View style={[styles.chapterNumberBadge, { backgroundColor: colors.pillBg }]}>
+          <Text style={[styles.chapterNumberText, { color: colors.primary }]}>{formattedNumber}</Text>
         </View>
 
         <View style={styles.chapterInfo}>
           <View style={styles.chapterTitleRow}>
             <Text style={[styles.sanskritName, { color: colors.sanskrit }]}>{item.name}</Text>
-            <Text style={[styles.versesCountBadge, { color: colors.textMuted }]}>
-              {item.verses_count} Verses
-            </Text>
+            <View style={[styles.verseCountPill, { backgroundColor: colors.primaryLight }]}>
+              <Text style={[styles.verseCountText, { color: colors.primary }]}>
+                {item.verses_count} Verses
+              </Text>
+            </View>
           </View>
 
           <Text style={[styles.transliteratedName, { color: colors.textPrimary }]} numberOfLines={1}>
@@ -147,7 +173,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </Text>
         </View>
 
-        <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+        <View style={styles.chevronBox}>
+          <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+        </View>
       </TouchableOpacity>
     );
   };
@@ -170,45 +198,79 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderChapterItem}
         contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.primary} />}
         ListHeaderComponent={
           <View>
-            {/* Top Invocation Header */}
+            {/* Top Invocation Emblem */}
             <View style={styles.invocationBanner}>
               <Text style={[styles.invocationText, { color: colors.sanskrit }]}>
                 ॥ ॐ श्री परमात्मने नमः ॥
               </Text>
-              <Text style={[styles.tagline, { color: colors.textSecondary }]}>
-                The Complete Bhagavad Gita • Offline Sanctuary
+              <Text style={[styles.tagline, { color: colors.textMuted }]}>
+                DIVINE SONG OF GOD • 18 CHAPTERS • 701 VERSES
               </Text>
             </View>
 
             {/* Daily Verse Card */}
             {renderDailyCard()}
 
-            {/* Quick Action Navigation Bar */}
+            {/* Quick Action Navigation Tiles */}
             <View style={styles.quickNavRow}>
               <TouchableOpacity
-                style={[styles.quickNavButton, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}
+                style={[
+                  styles.quickNavTile,
+                  {
+                    backgroundColor: colors.cardBackground,
+                    borderColor: colors.border,
+                    shadowColor: '#000',
+                  },
+                ]}
                 onPress={onOpenSearch}
+                activeOpacity={0.7}
               >
-                <Ionicons name="search" size={18} color={colors.primary} />
-                <Text style={[styles.quickNavText, { color: colors.textPrimary }]}>Search Gita</Text>
+                <View style={[styles.quickNavIconBox, { backgroundColor: colors.primaryLight }]}>
+                  <Ionicons name="search" size={18} color={colors.primary} />
+                </View>
+                <View>
+                  <Text style={[styles.quickNavTitle, { color: colors.textPrimary }]}>Search Gita</Text>
+                  <Text style={[styles.quickNavDesc, { color: colors.textMuted }]}>Topics & Sanskrit words</Text>
+                </View>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.quickNavButton, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}
+                style={[
+                  styles.quickNavTile,
+                  {
+                    backgroundColor: colors.cardBackground,
+                    borderColor: colors.border,
+                    shadowColor: '#000',
+                  },
+                ]}
                 onPress={onOpenBookmarks}
+                activeOpacity={0.7}
               >
-                <Ionicons name="bookmark" size={18} color={colors.primary} />
-                <Text style={[styles.quickNavText, { color: colors.textPrimary }]}>Saved Verses</Text>
+                <View style={[styles.quickNavIconBox, { backgroundColor: colors.goldLight }]}>
+                  <Ionicons name="bookmark" size={18} color={colors.gold} />
+                </View>
+                <View>
+                  <Text style={[styles.quickNavTitle, { color: colors.textPrimary }]}>Saved Verses</Text>
+                  <Text style={[styles.quickNavDesc, { color: colors.textMuted }]}>Bookmarks & notes</Text>
+                </View>
               </TouchableOpacity>
             </View>
 
             {/* Section Title */}
             <View style={styles.sectionHeader}>
-              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>18 Chapters (अध्यायाः)</Text>
-              <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>701 Verses Total</Text>
+              <View>
+                <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Divine Discourses</Text>
+                <Text style={[styles.sectionSubtitle, { color: colors.sanskritSubtle }]}>अध्यायाः (1 - 18)</Text>
+              </View>
+              <View style={[styles.allVersesCountBadge, { backgroundColor: colors.pillBg }]}>
+                <Text style={[styles.allVersesCountText, { color: colors.textSecondary }]}>
+                  701 Shlokas
+                </Text>
+              </View>
             </View>
           </View>
         }
@@ -229,7 +291,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   listContent: {
     padding: 16,
@@ -237,27 +299,28 @@ const styles = StyleSheet.create({
   },
   invocationBanner: {
     alignItems: 'center',
-    marginVertical: 12,
+    paddingVertical: 14,
   },
   invocationText: {
     fontSize: 18,
-    fontWeight: 'bold',
-    letterSpacing: 1.2,
+    fontWeight: '800',
+    letterSpacing: 1.5,
   },
   tagline: {
-    fontSize: 13,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.8,
     marginTop: 4,
   },
   dailyCard: {
-    borderRadius: 16,
+    borderRadius: 22,
     borderWidth: 1,
     padding: 18,
-    marginVertical: 12,
+    marginBottom: 14,
     elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
   },
   dailyHeaderRow: {
     flexDirection: 'row',
@@ -265,125 +328,162 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
-  dailyTag: {
+  dailyTagPill: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 5,
     borderRadius: 12,
-    gap: 6,
+    gap: 5,
   },
   dailyTagText: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.5,
+    fontSize: 10.5,
+    fontWeight: '800',
+    letterSpacing: 0.6,
+  },
+  refPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
   },
   dailyVerseRef: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 11.5,
+    fontWeight: '700',
+  },
+  quoteBox: {
+    paddingVertical: 6,
+    alignItems: 'center',
   },
   dailySanskrit: {
-    fontWeight: '700',
-    lineHeight: 24,
-    marginBottom: 8,
+    fontWeight: '800',
+    lineHeight: 28,
     textAlign: 'center',
+    letterSpacing: 0.2,
   },
   dailyTranslation: {
-    lineHeight: 20,
+    lineHeight: 21,
     fontStyle: 'italic',
-    marginBottom: 14,
     textAlign: 'center',
+    marginVertical: 10,
   },
   dailyActionsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 4,
-    gap: 12,
+    marginTop: 6,
+    gap: 10,
   },
-  dailyButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 20,
-    gap: 6,
-  },
-  dailyButtonText: {
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  dailyButtonPrimary: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    gap: 6,
+  dailyListenBtn: {
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 14,
+    gap: 6,
   },
-  dailyButtonPrimaryText: {
+  dailyListenText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  dailyReadBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 14,
+    gap: 6,
+  },
+  dailyReadText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   quickNavRow: {
     flexDirection: 'row',
     gap: 12,
     marginVertical: 8,
   },
-  quickNavButton: {
+  quickNavTile: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 12,
+    padding: 12,
+    borderRadius: 16,
     borderWidth: 1,
-    gap: 8,
-    elevation: 1,
+    gap: 10,
+    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
   },
-  quickNavText: {
-    fontSize: 14,
-    fontWeight: '600',
+  quickNavIconBox: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  quickNavTitle: {
+    fontSize: 13.5,
+    fontWeight: '700',
+  },
+  quickNavDesc: {
+    fontSize: 11,
+    fontWeight: '500',
+    marginTop: 2,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 18,
-    marginBottom: 10,
-    paddingHorizontal: 4,
+    marginBottom: 12,
+    paddingHorizontal: 2,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 17,
+    fontWeight: '800',
+    letterSpacing: 0.2,
   },
   sectionSubtitle: {
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '700',
+    marginTop: 1,
+  },
+  allVersesCountBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
+  },
+  allVersesCountText: {
+    fontSize: 12,
+    fontWeight: '700',
   },
   chapterCard: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 14,
-    borderRadius: 14,
+    borderRadius: 18,
     borderWidth: 1,
     marginBottom: 10,
-    elevation: 1,
+    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
   },
   chapterNumberBadge: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
   },
   chapterNumberText: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
   chapterInfo: {
     flex: 1,
@@ -392,22 +492,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 2,
+    marginBottom: 3,
   },
   sanskritName: {
     fontSize: 16,
+    fontWeight: '800',
+  },
+  verseCountPill: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  verseCountText: {
+    fontSize: 11,
     fontWeight: '700',
   },
-  versesCountBadge: {
-    fontSize: 11,
-    fontWeight: '500',
-  },
   transliteratedName: {
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: '600',
+    marginBottom: 2,
   },
   translationName: {
     fontSize: 12,
-    marginTop: 2,
+  },
+  chevronBox: {
+    marginLeft: 6,
   },
 });

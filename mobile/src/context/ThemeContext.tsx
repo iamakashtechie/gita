@@ -3,40 +3,64 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 export interface ThemeColors {
   background: string;
   cardBackground: string;
+  surfaceElevated: string;
   primary: string;
   primaryLight: string;
+  primaryHover: string;
   textPrimary: string;
   textSecondary: string;
   textMuted: string;
   sanskrit: string;
+  sanskritSubtle: string;
   border: string;
+  borderSubtle: string;
   accent: string;
+  gold: string;
+  goldLight: string;
+  pillBg: string;
+  pillActive: string;
 }
 
 export const lightTheme: ThemeColors = {
-  background: '#FAF7F2',
+  background: '#FAF8F5',
   cardBackground: '#FFFFFF',
-  primary: '#B45309',
-  primaryLight: '#FEF3C7',
-  textPrimary: '#1F2937',
-  textSecondary: '#4B5563',
-  textMuted: '#9CA3AF',
-  sanskrit: '#92400E',
-  border: '#E5E7EB',
+  surfaceElevated: '#FFFFFF',
+  primary: '#C25E00',
+  primaryLight: '#FFF4E6',
+  primaryHover: '#A85100',
+  textPrimary: '#1F1E1B',
+  textSecondary: '#5C5852',
+  textMuted: '#9E988F',
+  sanskrit: '#943E00',
+  sanskritSubtle: '#B85300',
+  border: '#EFEBE4',
+  borderSubtle: '#F3EFE9',
   accent: '#D97706',
+  gold: '#D97706',
+  goldLight: '#FEF3C7',
+  pillBg: '#F3EFE9',
+  pillActive: '#C25E00',
 };
 
 export const darkTheme: ThemeColors = {
-  background: '#121214',
-  cardBackground: '#1C1C22',
-  primary: '#F59E0B',
-  primaryLight: '#2C2214',
-  textPrimary: '#F3F4F6',
-  textSecondary: '#9CA3AF',
-  textMuted: '#6B7280',
+  background: '#0F0F12',
+  cardBackground: '#18181D',
+  surfaceElevated: '#202028',
+  primary: '#FB923C',
+  primaryLight: 'rgba(251, 146, 60, 0.12)',
+  primaryHover: '#F97316',
+  textPrimary: '#F5F3EF',
+  textSecondary: '#A39F99',
+  textMuted: '#6B6760',
   sanskrit: '#FBBF24',
-  border: '#272730',
+  sanskritSubtle: '#F59E0B',
+  border: '#2A2A33',
+  borderSubtle: '#22222B',
   accent: '#F59E0B',
+  gold: '#F59E0B',
+  goldLight: 'rgba(245, 158, 11, 0.15)',
+  pillBg: '#22222B',
+  pillActive: '#FB923C',
 };
 
 export type FontSizeMultiplier = 0.9 | 1.0 | 1.15 | 1.3;

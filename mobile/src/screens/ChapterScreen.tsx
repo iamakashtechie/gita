@@ -73,26 +73,41 @@ export const ChapterScreen: React.FC<ChapterScreenProps> = ({
           {
             backgroundColor: isThisPlaying ? colors.primaryLight : colors.cardBackground,
             borderColor: isThisPlaying ? colors.primary : colors.border,
+            shadowColor: '#000',
           },
         ]}
         onPress={() => onSelectVerse(item.chapter_number, item.verse_number)}
         activeOpacity={0.7}
       >
         <View style={styles.verseHeaderRow}>
-          <View style={[styles.verseBadge, { backgroundColor: colors.primary }]}>
-            <Text style={styles.verseBadgeText}>
-              {item.chapter_number}.{item.verse_number}
+          <View
+            style={[
+              styles.verseBadge,
+              { backgroundColor: isThisPlaying ? colors.primary : colors.pillBg },
+            ]}
+          >
+            <Text
+              style={[
+                styles.verseBadgeText,
+                { color: isThisPlaying ? '#FFFFFF' : colors.primary },
+              ]}
+            >
+              Shloka {item.verse_number}
             </Text>
           </View>
 
           <TouchableOpacity
-            style={[styles.audioIconBtn, { backgroundColor: colors.primaryLight }]}
+            style={[
+              styles.audioIconBtn,
+              { backgroundColor: isThisPlaying ? colors.primary : colors.primaryLight },
+            ]}
             onPress={() => playVerse(item.chapter_number, item.verse_number)}
+            activeOpacity={0.7}
           >
             <Ionicons
-              name={isThisPlaying ? 'pause' : 'volume-medium'}
-              size={18}
-              color={colors.primary}
+              name={isThisPlaying ? 'pause' : 'volume-high'}
+              size={17}
+              color={isThisPlaying ? '#FFFFFF' : colors.primary}
             />
           </TouchableOpacity>
         </View>
@@ -100,7 +115,7 @@ export const ChapterScreen: React.FC<ChapterScreenProps> = ({
         <Text
           style={[
             styles.sanskritPreview,
-            { color: colors.sanskrit, fontSize: 15 * fontSizeMultiplier },
+            { color: colors.sanskrit, fontSize: 16 * fontSizeMultiplier },
           ]}
           numberOfLines={2}
         >
@@ -117,9 +132,10 @@ export const ChapterScreen: React.FC<ChapterScreenProps> = ({
     );
   };
 
-  const summaryText = showHindiSummary && chapter.chapter_summary_hindi
-    ? chapter.chapter_summary_hindi
-    : chapter.chapter_summary;
+  const summaryText =
+    showHindiSummary && chapter.chapter_summary_hindi
+      ? chapter.chapter_summary_hindi
+      : chapter.chapter_summary;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -128,14 +144,29 @@ export const ChapterScreen: React.FC<ChapterScreenProps> = ({
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderVerseCard}
         contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View style={styles.headerBlock}>
-            {/* Top Chapter Title */}
-            <View style={[styles.chapterOverviewCard, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
-              <Text style={[styles.chapterNumberLabel, { color: colors.primary }]}>
-                CHAPTER {chapter.chapter_number}
+            {/* Top Chapter Hero Card */}
+            <View
+              style={[
+                styles.chapterHeroCard,
+                {
+                  backgroundColor: colors.cardBackground,
+                  borderColor: colors.border,
+                  shadowColor: '#000',
+                },
+              ]}
+            >
+              <View style={[styles.chapterTagPill, { backgroundColor: colors.goldLight }]}>
+                <Text style={[styles.chapterTagText, { color: colors.primary }]}>
+                  CHAPTER {chapter.chapter_number < 10 ? `0${chapter.chapter_number}` : chapter.chapter_number}
+                </Text>
+              </View>
+
+              <Text style={[styles.sanskritTitle, { color: colors.sanskrit }]}>
+                {chapter.name}
               </Text>
-              <Text style={[styles.sanskritTitle, { color: colors.sanskrit }]}>{chapter.name}</Text>
               <Text style={[styles.transliteratedTitle, { color: colors.textPrimary }]}>
                 {chapter.name_transliterated}
               </Text>
@@ -143,38 +174,68 @@ export const ChapterScreen: React.FC<ChapterScreenProps> = ({
                 "{chapter.name_translation}"
               </Text>
 
-              {/* Recite Chapter Button */}
+              {/* Play All Chapter Button */}
               <TouchableOpacity
                 style={[styles.playAllButton, { backgroundColor: colors.primary }]}
                 onPress={() => playVerse(chapter.chapter_number, 1)}
+                activeOpacity={0.8}
               >
-                <Ionicons name="play" size={18} color="#FFFFFF" />
-                <Text style={styles.playAllText}>Listen All Verses ({chapter.verses_count})</Text>
+                <Ionicons name="play" size={17} color="#FFFFFF" />
+                <Text style={styles.playAllText}>
+                  Recite Entire Chapter ({chapter.verses_count} Shlokas)
+                </Text>
               </TouchableOpacity>
             </View>
 
-            {/* Chapter Summary Card with Language Toggle */}
-            <View style={[styles.summaryCard, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+            {/* Summary Card with Segmented Lang Selector */}
+            <View
+              style={[
+                styles.summaryCard,
+                {
+                  backgroundColor: colors.cardBackground,
+                  borderColor: colors.border,
+                  shadowColor: '#000',
+                },
+              ]}
+            >
               <View style={styles.summaryTopRow}>
-                <Text style={[styles.summaryTitle, { color: colors.textPrimary }]}>Chapter Overview</Text>
-                <View style={styles.langToggle}>
+                <Text style={[styles.summaryTitle, { color: colors.textPrimary }]}>
+                  Chapter Overview
+                </Text>
+                <View style={[styles.langSegment, { backgroundColor: colors.pillBg }]}>
                   <TouchableOpacity
                     style={[
-                      styles.langBtn,
-                      !showHindiSummary && { backgroundColor: colors.primary },
+                      styles.langSegmentBtn,
+                      !showHindiSummary && { backgroundColor: colors.cardBackground },
                     ]}
                     onPress={() => setShowHindiSummary(false)}
+                    activeOpacity={0.7}
                   >
-                    <Text style={[styles.langBtnText, !showHindiSummary && { color: '#FFFFFF' }]}>English</Text>
+                    <Text
+                      style={[
+                        styles.langSegmentText,
+                        { color: !showHindiSummary ? colors.primary : colors.textMuted },
+                      ]}
+                    >
+                      English
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[
-                      styles.langBtn,
-                      showHindiSummary && { backgroundColor: colors.primary },
+                      styles.langSegmentBtn,
+                      showHindiSummary && { backgroundColor: colors.cardBackground },
                     ]}
                     onPress={() => setShowHindiSummary(true)}
+                    activeOpacity={0.7}
                   >
-                    <Text style={[styles.langBtnText, showHindiSummary && { color: '#FFFFFF' }]}>हिन्दी</Text>
+                    <Text
+                      style={[
+                        styles.langSegmentText,
+                        { color: showHindiSummary ? colors.primary : colors.textMuted },
+                      ]}
+                    >
+                      हिन्दी
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -189,20 +250,28 @@ export const ChapterScreen: React.FC<ChapterScreenProps> = ({
               <TouchableOpacity
                 onPress={() => setIsSummaryExpanded(!isSummaryExpanded)}
                 style={styles.expandButton}
+                activeOpacity={0.7}
               >
                 <Text style={[styles.expandText, { color: colors.primary }]}>
-                  {isSummaryExpanded ? 'Show Less ▲' : 'Read Full Summary ▼'}
+                  {isSummaryExpanded ? 'Show Less ▲' : 'Read Full Overview ▼'}
                 </Text>
               </TouchableOpacity>
             </View>
 
             <View style={styles.versesListHeader}>
-              <Text style={[styles.versesListTitle, { color: colors.textPrimary }]}>
-                Verses (श्लोकाः)
-              </Text>
-              <Text style={[styles.versesListCount, { color: colors.textMuted }]}>
-                1 to {chapter.verses_count}
-              </Text>
+              <View>
+                <Text style={[styles.versesListTitle, { color: colors.textPrimary }]}>
+                  Verses
+                </Text>
+                <Text style={[styles.versesListSub, { color: colors.sanskritSubtle }]}>
+                  श्लोकाः (1 - {chapter.verses_count})
+                </Text>
+              </View>
+              <View style={[styles.versePillCount, { backgroundColor: colors.pillBg }]}>
+                <Text style={[styles.versePillCountText, { color: colors.textSecondary }]}>
+                  {chapter.verses_count} Total
+                </Text>
+              </View>
             </View>
           </View>
         }
@@ -225,147 +294,180 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   headerBlock: {
-    marginBottom: 12,
+    marginBottom: 8,
   },
-  chapterOverviewCard: {
-    borderRadius: 16,
-    padding: 20,
+  chapterHeroCard: {
+    borderRadius: 22,
+    padding: 22,
     borderWidth: 1,
     alignItems: 'center',
     marginBottom: 12,
-    elevation: 2,
+    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
   },
-  chapterNumberLabel: {
-    fontSize: 12,
+  chapterTagPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  chapterTagText: {
+    fontSize: 11,
     fontWeight: '800',
     letterSpacing: 1.2,
-    marginBottom: 4,
   },
   sanskritTitle: {
-    fontSize: 22,
-    fontWeight: '700',
+    fontSize: 24,
+    fontWeight: '800',
     marginBottom: 4,
+    letterSpacing: 0.3,
   },
   transliteratedTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
     marginBottom: 6,
   },
   meaningText: {
-    fontSize: 14,
+    fontSize: 13.5,
     fontStyle: 'italic',
     textAlign: 'center',
     marginBottom: 16,
+    lineHeight: 18,
   },
   playAllButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 24,
+    paddingVertical: 11,
+    paddingHorizontal: 22,
+    borderRadius: 16,
     gap: 8,
+    elevation: 2,
+    shadowColor: '#C25E00',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
   },
   playAllText: {
     color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 13.5,
+    fontWeight: '700',
   },
   summaryCard: {
-    borderRadius: 14,
-    padding: 16,
+    borderRadius: 18,
+    padding: 18,
     borderWidth: 1,
-    marginBottom: 16,
+    marginBottom: 14,
+    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
   },
   summaryTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 12,
   },
   summaryTitle: {
     fontSize: 15,
+    fontWeight: '800',
+  },
+  langSegment: {
+    flexDirection: 'row',
+    borderRadius: 10,
+    padding: 3,
+    gap: 2,
+  },
+  langSegmentBtn: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+  },
+  langSegmentText: {
+    fontSize: 12,
     fontWeight: '700',
   },
-  langToggle: {
-    flexDirection: 'row',
-    borderRadius: 8,
-    backgroundColor: 'rgba(0,0,0,0.05)',
-    padding: 2,
-  },
-  langBtn: {
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 6,
-  },
-  langBtnText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
   summaryContent: {
-    fontSize: 13,
-    lineHeight: 20,
+    fontSize: 13.5,
+    lineHeight: 21,
   },
   expandButton: {
-    marginTop: 8,
+    marginTop: 10,
     alignSelf: 'flex-start',
   },
   expandText: {
-    fontSize: 12,
+    fontSize: 12.5,
     fontWeight: '700',
   },
   versesListHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 14,
     marginBottom: 12,
+    paddingHorizontal: 2,
   },
   versesListTitle: {
-    fontSize: 16,
+    fontSize: 17,
+    fontWeight: '800',
+  },
+  versesListSub: {
+    fontSize: 12,
+    fontWeight: '700',
+    marginTop: 1,
+  },
+  versePillCount: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
+  },
+  versePillCountText: {
+    fontSize: 12,
     fontWeight: '700',
   },
-  versesListCount: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
   verseCard: {
-    borderRadius: 12,
-    padding: 14,
+    borderRadius: 18,
+    padding: 16,
     borderWidth: 1,
     marginBottom: 10,
-    elevation: 1,
+    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
   },
   verseHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   verseBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
   },
   verseBadgeText: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 0.3,
   },
   audioIconBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     alignItems: 'center',
     justifyContent: 'center',
   },
   sanskritPreview: {
-    fontWeight: '700',
-    lineHeight: 22,
-    marginBottom: 4,
+    fontWeight: '800',
+    lineHeight: 24,
+    marginBottom: 6,
   },
   transliterationPreview: {
     fontSize: 13,
-    lineHeight: 18,
+    lineHeight: 19,
     fontStyle: 'italic',
   },
 });
